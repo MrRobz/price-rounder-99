@@ -8,7 +8,7 @@
     {
       "matches": ["*://*/*"],
       "exclude_matches": ["*://*/*checkout*"],
-      "css": ["content/styles.css"],
+      "css": ["content/styles.css", "content/tooltip.css"],
       "js": ["content/script.js"]
     }
   ],

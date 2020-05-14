@@ -1,13 +1,12 @@
 html,body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Segoe UI','Chrome Droid Sans','Droid Sans Fallback','Lucida Grande','Tahoma',sans-serif;
 }
 .popup-wrapper {
   background-color: #F9F9FA;
-  min-width: 320px;
+  min-width: 340px;
   box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.25);
-  border-radius: 2px;
 }
 
 .header {
@@ -31,51 +30,54 @@ html,body {
   color: #25282B;
 }
 
-.rules-list {
-  display: flex;
-  flex-direction: column;
-}
-
 .rule-wrapper {
   display: flex;
   flex-direction: column;
-  background-color: #E8E8E8;
-  margin: 1px 0;
-}
-
-.rule {
-  display: flex;
-  margin: 15px 25px 5px 25px;
-  color: #25282B;
-}
-
-.rule-title {
-  flex: 1;
-  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
-  font-weight: 500;
+  color: #25282B;
+  font-size: 16px;
+  padding: 10px 0;
 }
 
-.rule-switch {
-  display: flex;
-  align-items: center;
+.rule-input {
+  margin: 8px 0;
+  text-align:center
 }
 
 .rule-input input {
-  width: 28px;
-  height: 28px;
-  outline: none;
-  font-size: 16px;
-  padding-left: 10px;
+  font-size: 20px;
+  width: 45px;
+  padding-left: 5px;
+  background: #FFFFFF;
+  border: 1px solid rgba(26, 183, 89, 0.8);
 }
 
-.rule-text {
-  font-size: 10px;
-  margin: 0 20px 5px 20px;
-  color: #25282B;
+input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
 }
+
+.examples-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  color: #52575C;
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+}
+
+.strong {
+  color: #25282B;
+  font-weight: 600;
+}
+
 
 .footer-btns {
   display: flex;
@@ -111,6 +113,17 @@ html,body {
   border-right: 1px solid #CACCCF;
 }
 
+.refresh {
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hide {
+  display: none;
+}
+
 /* switch */
 .switch {
   position: relative;
@@ -133,8 +146,7 @@ html,body {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  /* transition: .4s; */
 }
 
 .slider:before {
@@ -145,8 +157,7 @@ html,body {
   left: 4px;
   bottom: 2px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  /* transition: .4s; */
 }
 
 input:checked + .slider {
