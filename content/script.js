@@ -1,3 +1,5 @@
+chrome.runtime.sendMessage({'address': '123'})
+
 let siteName = window.location.origin
 
 let isExtensionEnabled;
@@ -36,14 +38,18 @@ function findNumberDoms(domElements = []) {
       let elements = element.childNodes;
       findNumberDoms(elements)
     } else {
-      let numberString = (element.wholeText || '').trim().replace(/[^.\d]/g, "");
-      if(/\d+.?\d*\s?$/.test(element.wholeText) &&!!parseFloat(numberString) && !isNaN(numberString)) {
+      let numberString = (element.wholeText || '').trim().replace(/[^\.\d\s]/g, "");
+      numberString = (numberString.match(/\d+(?:\d*[\.,]?\d*)*\d*/) || [])[0];
+      if(numberString 
+          &&!!parseFloat(numberString) 
+          && !isNaN(numberString)
+          && !element.wholeText.includes("%")) {
         let textContent = element.parentElement.textContent;
         let newValue = roundNumber(numberString, differenceLimit);
 
         if (parseFloat(numberString) !== parseFloat(newValue)) {
           let parentElement = element.parentElement;
-          parentElement.textContent = textContent.replace(/\d+.?\d*/, newValue);
+          parentElement.innerHTML = parentElement.innerHTML.replace(/\d+(?:\d*[\.,]?\d*)*\d*/, newValue);
 
           parentElement.setAttribute('aria-label', textContent);
           parentElement.setAttribute('role', 'tooltip');
