@@ -8,12 +8,12 @@
     {
       "matches": ["*://*/*"],
       "exclude_matches": ["*://*/*checkout*"],
-      "css": ["content/styles.css", "content/tooltip.css"],
-      "js": ["content/script.js"]
+      "css": ["css/styles.css", "css/tooltip.css"],
+      "js": ["js/content.js"]
     }
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["js/background.js"],
     "persistent": false
   },
   "icons": {

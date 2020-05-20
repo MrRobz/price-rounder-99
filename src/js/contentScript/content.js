@@ -1,6 +1,6 @@
-chrome.runtime.sendMessage({'address': '123'})
+chrome.runtime.sendMessage({'address': '123'});
 
-let siteName = window.location.origin
+let siteName = window.location.origin;
 
 let isExtensionEnabled;
 let differenceLimit;
