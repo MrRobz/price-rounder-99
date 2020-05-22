@@ -5,8 +5,8 @@
   "main": "\"\"",
   "dependencies": {},
   "scripts": {
-    "start": "rollup -c -w",
-    "build": "rollup -c"
+    "start": "chokidar \"src/**/*\" -c \"rollup -c\"",
+    "build": "rollup -c --environment INCLUDE_DEPS,BUILD:production"
   },
   "author": "",
   "license": "ISC",

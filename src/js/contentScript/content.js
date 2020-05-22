@@ -1,6 +1,11 @@
-chrome.runtime.sendMessage({'address': '123'});
+
+import checkIfToEnableExtension from "../utils/checkIfToEnable.js";
+import { roundNumber } from "../utils/rounder.js";
+import config from "./config.js";
 
 let siteName = window.location.origin;
+let isCompatibleSite = checkIfToEnableExtension(siteName);
+chrome.runtime.sendMessage({'enableExtension': isCompatibleSite });
 
 let isExtensionEnabled;
 let differenceLimit;
@@ -15,14 +20,10 @@ async function main() {
   differenceLimit = differenceLimit || 4;  
   isExtensionEnabled = isExtensionEnabled != undefined ? isExtensionEnabled : true;
   
-  if (isExtensionEnabled) {    
-    let domElements;
-    if (origin.includes('amazon')) {
-      domElements = document.querySelectorAll("[class*='price'],[id*='price']");
-      // domElements = document.querySelectorAll(".a-price-whole");
-    } else {
-      // domElements = document.querySelectorAll("body *");
-    }
+  if (isExtensionEnabled && isCompatibleSite) {
+    let configObj = getConfigObj(siteName);
+
+    let domElements = configObj.findDomElements(document);
 
     findNumberDoms(domElements);
   }
@@ -61,47 +62,20 @@ function findNumberDoms(domElements = []) {
   });
 }
 
-function roundNumber(number, differenceLimit) {
-  let origNumber = number;
-  number = parseFloat(number);
-  differenceLimit = parseFloat(differenceLimit);
-  let nextWholeNumber = findNextWholeNumber(number);
-
-  let difference  = nextWholeNumber - number;
-
-  if (difference <= differenceLimit) {
-    return returnNumberWithPointer(nextWholeNumber, origNumber);
-  } else {
-    return returnNumberWithPointer(number, origNumber);
-  }
-}
-
-function returnNumberWithPointer(number, origNumber) {
-  if (number == parseInt(origNumber)) {
-    if (String(origNumber).includes('.')) {
-      return number.toFixed(2);
-    }
-  }
-  return number;
-}
-
-function findNextWholeNumber(number) {
-  return Math.ceil(number / 10) * 10;
-}
-
 const registerMutationObserver = (mutationObserver) => {
   mutationObserver.observe(document.body, {childList: true, subtree: true});
 };
 
 const mutationObserver = new MutationObserver(function (mutationRecords) {
   mutationObserver.disconnect();
+  let configObj = getConfigObj(siteName);
   mutationRecords.forEach(function (mutationRecord) {
     if (mutationRecord.type === 'childList') {
       mutationRecord.addedNodes.forEach(function (node) {
         if(node.nodeName != 'SCRIPT' && /\d+/.test(node.textContent)) {
-          let domElements = node.querySelectorAll && node.querySelectorAll("[class*='price'],[id*='price']");
+          let domElements = configObj.findDomElements(document);
 
-          if (isExtensionEnabled) {
+          if (isExtensionEnabled && isCompatibleSite) {
             findNumberDoms(domElements);
           }
         }
@@ -110,3 +84,11 @@ const mutationObserver = new MutationObserver(function (mutationRecords) {
   });
   registerMutationObserver(mutationObserver);
 });
+
+function getConfigObj(siteName) {
+  for (key in config ) {
+    if (siteName.includes(key)) {
+      return config[key];
+    }
+  }
+}

@@ -24,7 +24,7 @@ chrome.storage.sync.get(['isExtensionEnabled'], ({ isExtensionEnabled }) => {
 });
 
 chrome.storage.sync.get(['differenceLimit'], ({ differenceLimit }) => {
-  differenceLimitInput.value = differenceLimit;
+  differenceLimitInput.value = differenceLimit || 4;
 });
 
 

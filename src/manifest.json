@@ -6,10 +6,10 @@
   "options_page": "options.html",
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": ["<all_urls>"],
       "exclude_matches": ["*://*/*checkout*"],
-      "css": ["css/styles.css", "css/tooltip.css"],
-      "js": ["js/content.js"]
+      "css": ["css/content.css", "css/tooltip.css"],
+      "js": ["content.js"]
     }
   ],
   "background": {
@@ -24,12 +24,12 @@
   },
 	"page_action": {
     "default_icon": {
-      "16": "assets/price-corrector-16.png",
-      "32": "assets/price-corrector-32.png",
-      "48": "assets/price-corrector-48.png",
-      "128": "assets/price-corrector-128.png"
+      "16": "assets/price-corrector-disable-16.png",
+      "32": "assets/price-corrector-disable-32.png",
+      "48": "assets/price-corrector-disable-48.png",
+      "128": "assets/price-corrector-disable-128.png"
     },
-    "default_popup": "popup/popup.html",
+    "default_popup": "popup.html",
 		"default_name": "Price Corrector"
 	},
   "manifest_version": 2
