@@ -1,6 +1,5 @@
 
 import checkIfToEnableExtension from "../utils/checkIfToEnable.js";
-import { roundNumber } from "../utils/rounder.js";
 import config from "./config.js";
 
 let siteName = window.location.origin;
@@ -21,45 +20,12 @@ async function main() {
   isExtensionEnabled = isExtensionEnabled != undefined ? isExtensionEnabled : true;
   
   if (isExtensionEnabled && isCompatibleSite) {
-    let configObj = getConfigObj(siteName);
+    let configObj = getConfigObj();
 
-    let domElements = configObj.findDomElements(document);
-
-    findNumberDoms(domElements);
+    configObj.findNumberDoms(document, differenceLimit);
+    
+    registerMutationObserver(mutationObserver);
   }
-
-  registerMutationObserver(mutationObserver);
-}
-
-main();
-
-function findNumberDoms(domElements = []) {
-  domElements.forEach(element => {
-    if (element.hasChildNodes()) {
-      let elements = element.childNodes;
-      findNumberDoms(elements)
-    } else {
-      let numberString = (element.wholeText || '').trim().replace(/[^\.\d\s]/g, "");
-      numberString = (numberString.match(/\d+(?:\d*[\.,]?\d*)*\d*/) || [])[0];
-      if(numberString 
-          &&!!parseFloat(numberString) 
-          && !isNaN(numberString)
-          && !element.wholeText.includes("%")) {
-        let textContent = element.parentElement.textContent;
-        let newValue = roundNumber(numberString, differenceLimit);
-
-        if (parseFloat(numberString) !== parseFloat(newValue)) {
-          let parentElement = element.parentElement;
-          parentElement.innerHTML = parentElement.innerHTML.replace(/\d+(?:\d*[\.,]?\d*)*\d*/, newValue);
-
-          parentElement.setAttribute('aria-label', textContent);
-          parentElement.setAttribute('role', 'tooltip');
-          parentElement.setAttribute('data-microtip-position', 'right');
-        }
-        
-      }
-    }
-  });
 }
 
 const registerMutationObserver = (mutationObserver) => {
@@ -68,16 +34,12 @@ const registerMutationObserver = (mutationObserver) => {
 
 const mutationObserver = new MutationObserver(function (mutationRecords) {
   mutationObserver.disconnect();
-  let configObj = getConfigObj(siteName);
+  let configObj = getConfigObj();
   mutationRecords.forEach(function (mutationRecord) {
     if (mutationRecord.type === 'childList') {
       mutationRecord.addedNodes.forEach(function (node) {
-        if(node.nodeName != 'SCRIPT' && /\d+/.test(node.textContent)) {
-          let domElements = configObj.findDomElements(document);
-
-          if (isExtensionEnabled && isCompatibleSite) {
-            findNumberDoms(domElements);
-          }
+        if(!['SCRIPT', 'STYLE'].includes(node.nodeName) && /\d+/.test(node.textContent)) {
+          configObj.findNumberDoms(node, differenceLimit);
         }
       });
     }
@@ -85,10 +47,12 @@ const mutationObserver = new MutationObserver(function (mutationRecords) {
   registerMutationObserver(mutationObserver);
 });
 
-function getConfigObj(siteName) {
+main();
+
+function getConfigObj() {
   for (key in config ) {
-    if (siteName.includes(key)) {
+    if (window.location.origin.includes(key)) {
       return config[key];
     }
   }
-}
+}  

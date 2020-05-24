@@ -1,7 +1,7 @@
 {
-  "name": "Getting Started Example",
+  "name": "Price Corrector",
   "version": "1.0",
-  "description": "Build an Extension!",
+  "description": "",
   "permissions": ["activeTab", "declarativeContent", "storage"],
   "options_page": "options.html",
   "content_scripts": [
