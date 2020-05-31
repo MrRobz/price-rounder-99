@@ -26,8 +26,8 @@ export default {
           dest: 'dist', 
           transform: (contents) => {
             return Buffer.from(JSON.stringify({
-              version: process.env.npm_package_version,
-              ...JSON.parse(contents.toString())
+              ...JSON.parse(contents.toString()),
+              version: process.env.npm_package_version
             }))
           }
         }

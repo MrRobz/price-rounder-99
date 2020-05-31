@@ -1,12 +1,11 @@
 {
   "name": "Price Corrector",
-  "version": "1.0",
-  "description": "",
-  "permissions": ["activeTab", "declarativeContent", "storage"],
+  "version": "0.0.0",
+  "description": "price rounder for ecommerce websites.",
+  "permissions": ["storage"],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "exclude_matches": ["*://*/*checkout*"],
+      "matches": ["https://amazon.com/*", "https://amazon.in/*"],
       "css": ["css/content.css", "css/tooltip.css"],
       "js": ["content.js"]
     }
