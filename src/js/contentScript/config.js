@@ -47,12 +47,29 @@ const config = {
               let newValue = roundNumber(numberString, differenceLimit);
 
               if (parseFloat(numberString) !== parseFloat(newValue)) {
-                updatePriceDom(node, numberFormating.format(newValue));
+                updateSitePriceDom('amazon.com', node, numberFormating.format(newValue));
                 setTooltipOnElement(node, textContent);
               }
             }
         }
       });
+    },
+    updatePriceDom: (node, priceValue) => {
+      let textMatch = node.textContent.trim().replace(/[^\.\d\s,]/g, "");
+      if (node.innerHTML.includes(textMatch)) {
+        node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
+      } else {
+        let priceTextNode = node.querySelector('.a-price-whole');
+        priceTextNode = !priceTextNode ? (node.querySelector('ppnn') || {}).parentElement : priceTextNode;
+        let priceFractionTextNode = node.querySelector('.a-price-fraction');
+        if (priceTextNode) {
+          if (priceTextNode.textContent.includes("$")) {
+            priceValue = "$" + priceValue;
+          }
+          priceTextNode.textContent = priceValue;
+          priceFractionTextNode ? priceFractionTextNode.textContent = "00" : '';
+        }
+      }
     }
   }
 }
@@ -75,21 +92,9 @@ function containsNumber(text) {
   return text.match(/\d+(?:\d*[\.,]?\d*)*\d*/g) || []
 }
 
-function updatePriceDom(node, priceValue) {
-  let textMatch = node.textContent.trim().replace(/[^\.\d\s,]/g, "");
-  if (node.innerHTML.includes(textMatch)) {
-    node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
-  } else {
-    let priceTextNode = node.querySelector('.a-price-whole');
-    priceTextNode = !priceTextNode ? (node.querySelector('ppnn') || {}).parentElement : null;
-    let priceFractionTextNode = node.querySelector('.a-price-fraction');
-    if (priceTextNode) {
-      priceTextNode.textContent = priceValue;
-      priceFractionTextNode ? priceFractionTextNode.textContent = "00" : '';
-    } else {
-      console.log("price node not found");
-    }
-  }
+function updateSitePriceDom(siteName, node, priceValue) {
+  let fn = (config[siteName] || {}).updatePriceDom;
+  fn ? fn(node, priceValue) : null;
 }
 
 export default config;

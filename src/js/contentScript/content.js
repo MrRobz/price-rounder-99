@@ -4,7 +4,6 @@ import config from "./config.js";
 
 let siteName = window.location.origin;
 let isCompatibleSite = checkIfToEnableExtension(siteName);
-chrome.runtime.sendMessage({'enableExtension': isCompatibleSite });
 
 let isExtensionEnabled;
 let differenceLimit;
@@ -16,6 +15,7 @@ async function main() {
   isExtensionEnabled = await isExtensionEnabledPromise;
   differenceLimit = await differenceLimitPromise;
 
+  chrome.runtime.sendMessage({'enableExtension': isCompatibleSite && isExtensionEnabled });
   differenceLimit = differenceLimit || 4;  
   isExtensionEnabled = isExtensionEnabled != undefined ? isExtensionEnabled : true;
   

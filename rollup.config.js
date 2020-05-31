@@ -9,7 +9,7 @@ if (isProd) {
 }
 
 export default {
-  input: ['src/js/contentScript/content.js'],
+  input: ['src/js/contentScript/content.js', 'src/js/background.js', 'src/js/popup.js'],
   output: {
     format: 'esm',
     dir: 'dist'
@@ -20,9 +20,7 @@ export default {
     copy({
       targets: [
         { src: 'src/assets', dest: 'dist' },
-        { src: 'src/js', dest: 'dist' },
         { src: 'src/css', dest: 'dist' },
-        { src: 'src/options.html', dest: 'dist' },
         { src: 'src/popup.html', dest: 'dist' },
         { src: 'src/manifest.json', 
           dest: 'dist', 
