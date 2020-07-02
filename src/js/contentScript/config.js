@@ -55,7 +55,7 @@ const config = {
       });
     },
     updatePriceDom: (node, priceValue) => {
-      let textMatch = node.textContent.trim().replace(/[^\.\d\s,]/g, "");
+      let textMatch = node.textContent.replace(/[^\.\d\s,]/g, "").trim();
       if (node.innerHTML.includes(textMatch)) {
         node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
       } else {
@@ -71,6 +71,12 @@ const config = {
         }
       }
     }
+  },
+
+  'flipkart': {
+    findNumberDoms: (rootElement, differenceLimit) => {
+      defaultWalkAndReplace(rootElement, differenceLimit, '₹', new Intl.NumberFormat('en-IN'));
+    }
   }
 }
 
@@ -81,7 +87,11 @@ const walkDOM = function(node, func) {
     if (matches.length > 1) {
       walkDOM(node, func);
     } else if (matches.length === 1) {
-      func(node);
+      if (node.querySelectorAll('*').length > 1) {
+        walkDOM(node, func);
+      } else {
+        func(node);
+      }
     }
     node = node.nextElementSibling;
   }
@@ -94,7 +104,34 @@ function containsNumber(text) {
 
 function updateSitePriceDom(siteName, node, priceValue) {
   let fn = (config[siteName] || {}).updatePriceDom;
-  fn ? fn(node, priceValue) : null;
+
+  if (fn) {
+    fn(node, priceValue)
+  } else {
+    let textMatch = node.textContent.replace(/[^\.\d\s,]/g, "").trim();
+    if (node.innerHTML.includes(textMatch)) {
+      node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
+    }
+  }
+}
+
+function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, numberFormating) {
+  walkDOM(rootElement, (node) => {
+    if (node.textContent.includes(priceSymbol)) {
+      let numberString = node.textContent.trim().replace(/[^\.\d\s]/g, "");
+
+      if(numberString && !!parseFloat(numberString) && !isNaN(numberString)) {
+          let textContent = node.textContent;
+          let newValue = roundNumber(numberString, differenceLimit);
+
+          if (parseFloat(numberString) !== parseFloat(newValue)) {
+
+            updateSitePriceDom('', node, numberFormating.format(newValue));
+            setTooltipOnElement(node, textContent);
+          }
+        }
+    }
+  });
 }
 
 export default config;
