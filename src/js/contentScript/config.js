@@ -77,6 +77,16 @@ const config = {
     findNumberDoms: (rootElement, differenceLimit) => {
       defaultWalkAndReplace(rootElement, differenceLimit, '₹', new Intl.NumberFormat('en-IN'));
     }
+  },
+  'myntra': {
+    findNumberDoms: (rootElement, differenceLimit) => {
+      let numberFormat = {
+        format: (number) => number
+      }
+      defaultWalkAndReplace(rootElement, differenceLimit, 'Rs.', numberFormat, {
+        regex: /[^\d\s]/g
+      });
+    }
   }
 }
 
@@ -87,7 +97,7 @@ const walkDOM = function(node, func) {
     if (matches.length > 1) {
       walkDOM(node, func);
     } else if (matches.length === 1) {
-      if (node.querySelectorAll('*').length > 1) {
+      if (node.querySelectorAll('*').length >= 1) {
         walkDOM(node, func);
       } else {
         func(node);
@@ -102,23 +112,25 @@ function containsNumber(text) {
   return text.match(/\d+(?:\d*[\.,]?\d*)*\d*/g) || []
 }
 
-function updateSitePriceDom(siteName, node, priceValue) {
+function updateSitePriceDom(siteName, node, priceValue, options) {
   let fn = (config[siteName] || {}).updatePriceDom;
 
   if (fn) {
     fn(node, priceValue)
   } else {
-    let textMatch = node.textContent.replace(/[^\.\d\s,]/g, "").trim();
+    let regex = options.regex || /[^\.\d\s]/g
+    let textMatch = node.textContent.replace(regex, "").trim();
     if (node.innerHTML.includes(textMatch)) {
       node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
     }
   }
 }
 
-function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, numberFormating) {
+function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, numberFormating, options = {}) {
   walkDOM(rootElement, (node) => {
     if (node.textContent.includes(priceSymbol)) {
-      let numberString = node.textContent.trim().replace(/[^\.\d\s]/g, "");
+      let regex = options.regex || /[^\.\d\s]/g
+      let numberString = node.textContent.trim().replace(regex, "");
 
       if(numberString && !!parseFloat(numberString) && !isNaN(numberString)) {
           let textContent = node.textContent;
@@ -126,7 +138,7 @@ function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, number
 
           if (parseFloat(numberString) !== parseFloat(newValue)) {
 
-            updateSitePriceDom('', node, numberFormating.format(newValue));
+            updateSitePriceDom('', node, numberFormating.format(newValue), options);
             setTooltipOnElement(node, textContent);
           }
         }
