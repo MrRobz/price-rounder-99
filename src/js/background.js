@@ -15,8 +15,13 @@ chrome.runtime.onMessage.addListener(function(req, sender) {
           "128": "assets/price-corrector-128.png",
         }
       })
-    } else {
-      // chrome.pageAction.hide(sender.tab.id);
     }
-  } 
+  } else if ('isCompatibleSite' in req) {
+    if (!req.isCompatibleSite) {
+      chrome.pageAction.setPopup({
+        tabId: sender.tab.id,
+        popup: './popup-non-compatable.html'
+      })
+    }
+  }
 });

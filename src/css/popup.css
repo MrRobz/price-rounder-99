@@ -237,3 +237,7 @@ input:checked + .slider:before {
   display: block;
 }
 /* dropdown css end */
+
+.no-support-wrapper {
+  padding: 15px;
+}

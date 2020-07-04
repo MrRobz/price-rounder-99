@@ -1,7 +1,7 @@
 'use strict';
 
-let differenceLimitInput = document.querySelector('#differenceLimitInput');
-let pauseBtn = document.querySelector('#pauseBtn');
+let differenceLimitInput = document.querySelector('#differenceLimitInput') || {};
+let pauseBtn = document.querySelector('#pauseBtn') || {};
 let isActive;
 
 chrome.storage.sync.get(['differenceLimit'], (result) => {
@@ -36,8 +36,6 @@ pauseBtn.onclick = function() {
   updateActiveState(isActive);
   showRefresh();
 }
-
-
 
 function updateExamples(differenceLimit) {
   [1,2,3,4,5,6].forEach(no => {

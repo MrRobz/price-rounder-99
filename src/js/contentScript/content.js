@@ -18,6 +18,7 @@ async function main() {
   differenceLimit = differenceLimit || 4;  
   isExtensionEnabled = isExtensionEnabled != undefined ? isExtensionEnabled : true;
   chrome.runtime.sendMessage({'enableExtension': isCompatibleSite && isExtensionEnabled });
+  chrome.runtime.sendMessage({'isCompatibleSite': isCompatibleSite });
   
   if (isExtensionEnabled && isCompatibleSite) {
     let configObj = getConfigObj();

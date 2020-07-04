@@ -22,6 +22,7 @@ export default {
         { src: 'src/assets', dest: 'dist' },
         { src: 'src/css', dest: 'dist' },
         { src: 'src/popup.html', dest: 'dist' },
+        { src: 'src/popup-non-compatable.html', dest: 'dist' },
         { src: 'src/manifest.json', 
           dest: 'dist', 
           transform: (contents) => {

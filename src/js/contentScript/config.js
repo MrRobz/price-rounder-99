@@ -40,7 +40,7 @@ const config = {
       let numberFormating = new Intl.NumberFormat('en-US');
       walkDOM(rootElement, (node) => {
         if (node.textContent.includes("$")) {
-          let numberString = node.textContent.trim().replace(/[^\.\d\s]/g, "");
+          let numberString = node.textContent.replace(/[^\.\d\s]/g, "").trim();
 
           if(numberString && !!parseFloat(numberString) && !isNaN(numberString)) {
               let textContent = node.textContent;
@@ -48,11 +48,12 @@ const config = {
 
               if (parseFloat(numberString) !== parseFloat(newValue)) {
                 updateSitePriceDom('amazon.com', node, numberFormating.format(newValue));
-                setTooltipOnElement(node, textContent);
+
+                setTooltipOnElement(node, textContent.trim());
               }
             }
         }
-      });
+      }, { eagarCheck: false });
     },
     updatePriceDom: (node, priceValue) => {
       let textMatch = node.textContent.replace(/[^\.\d\s,]/g, "").trim();
@@ -72,10 +73,11 @@ const config = {
       }
     }
   },
-
   'flipkart': {
     findNumberDoms: (rootElement, differenceLimit) => {
-      defaultWalkAndReplace(rootElement, differenceLimit, '₹', new Intl.NumberFormat('en-IN'));
+      defaultWalkAndReplace(rootElement, differenceLimit, '₹', new Intl.NumberFormat('en-IN'), {
+        eagarCheck: true
+      });
     }
   },
   'myntra': {
@@ -84,21 +86,40 @@ const config = {
         format: (number) => number
       }
       defaultWalkAndReplace(rootElement, differenceLimit, 'Rs.', numberFormat, {
-        regex: /[^\d\s]/g
+        regex: /[^\d\s]/g,
+        domUpdateRegex: /[^\d\s]/g,
+        eagarCheck: true
+      });
+    }
+  },
+  'snapdeal': {
+    findNumberDoms: (rootElement, differenceLimit) => {
+      defaultWalkAndReplace(rootElement, differenceLimit, /Rs\.?/, new Intl.NumberFormat('en-IN'), {
+        regex: /[^\d\s]/g,
+        domUpdateRegex: /[^,\d\s]/g,
+        eagarCheck: false
+      });
+    }
+  },
+  'ebay': {
+    findNumberDoms: (rootElement, differenceLimit) => {
+      defaultWalkAndReplace(rootElement, differenceLimit, /INR|US/, new Intl.NumberFormat('en'), {
+        domUpdateRegex: /[^,\.\d\s]/g,
+        eagarCheck: true
       });
     }
   }
 }
 
-const walkDOM = function(node, func) {
+const walkDOM = function(node, func, options) {
   node = node.firstElementChild;
   while(node) {
     let matches = containsNumber(node.textContent);
     if (matches.length > 1) {
-      walkDOM(node, func);
+      walkDOM(node, func, options);
     } else if (matches.length === 1) {
-      if (node.querySelectorAll('*').length >= 1) {
-        walkDOM(node, func);
+      if (options.eagarCheck && node.querySelectorAll('*').length >= 1) {
+        walkDOM(node, func, options);
       } else {
         func(node);
       }
@@ -118,7 +139,7 @@ function updateSitePriceDom(siteName, node, priceValue, options) {
   if (fn) {
     fn(node, priceValue)
   } else {
-    let regex = options.regex || /[^\.\d\s]/g
+    let regex = options.domUpdateRegex || /[^,\.\d\s]/g
     let textMatch = node.textContent.replace(regex, "").trim();
     if (node.innerHTML.includes(textMatch)) {
       node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
@@ -128,7 +149,9 @@ function updateSitePriceDom(siteName, node, priceValue, options) {
 
 function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, numberFormating, options = {}) {
   walkDOM(rootElement, (node) => {
-    if (node.textContent.includes(priceSymbol)) {
+    if (typeof priceSymbol === 'string')
+          priceSymbol = new RegExp(priceSymbol);
+    if (priceSymbol.test(node.textContent)) {
       let regex = options.regex || /[^\.\d\s]/g
       let numberString = node.textContent.trim().replace(regex, "");
 
@@ -143,7 +166,7 @@ function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, number
           }
         }
     }
-  });
+  }, options);
 }
 
 export default config;
