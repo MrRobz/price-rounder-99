@@ -1,54 +1,27 @@
 import { roundNumber } from "../utils/rounder.js";
 import { setTooltipOnElement } from "../utils/tooltip.js"
+import { getAmazonConfig } from "../utils/amazon-configs";
 
 const config = {
-  'amazon.in': {
+  'amazon': {
     findNumberDoms: (rootElement, differenceLimit) => {
-      let numberFormating = new Intl.NumberFormat('en-IN');
-      let domElements = rootElement.querySelectorAll && rootElement.querySelectorAll("[class*='price'],[id*='price']");
-      domElements = domElements || [];
+      let amazonConfig = getAmazonConfig(window.location.hostname.replace("www.amazon.", ""));
+      
+      let numberFormating = amazonConfig.locale ? new Intl.NumberFormat(amazonConfig.locale) : ({ format: (no) => no });
 
-      domElements.forEach(element => {
-        let textNode;
-        let walk=document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-
-        while(textNode=walk.nextNode()) {
-          let numberString = (textNode.wholeText || '').trim().replace(/[^\.\d\s]/g, "");
-          numberString = (numberString.match(/\d+(?:\d*[\.,]?\d*)*\d*/) || [])[0];
-          if(numberString 
-              &&!!parseFloat(numberString) 
-              && !isNaN(numberString)
-              && !textNode.wholeText.includes("%")) {
-            let textContent = textNode.parentElement.textContent;
-            let newValue = roundNumber(numberString, differenceLimit);
-    
-            if (parseFloat(numberString) !== parseFloat(newValue)) {
-              let parentElement = textNode.parentElement;
-              parentElement.innerHTML = parentElement.innerHTML.replace(/\d+(?:\d*[\.,]?\d*)*\d*/, numberFormating.format(newValue));
-    
-              setTooltipOnElement(parentElement, textContent);
-
-              break;
-            }
-          }
-        }
-      });
-    }
-  },
-  'amazon.com': {
-    findNumberDoms: (rootElement, differenceLimit) => {
-      let numberFormating = new Intl.NumberFormat('en-US');
       walkDOM(rootElement, (node) => {
-        if (node.textContent.includes("$")) {
-          let numberString = node.textContent.replace(/[^\.\d\s]/g, "").trim();
+        if (node.textContent.includes(amazonConfig.currency)) {
+          let numberString = node.textContent.trim().replace(/[^\.\d\s]/g, "");
+          numberString = (numberString.match(amazonConfig.regex || /\d+\.?\d*/g)||[])[0];
 
           if(numberString && !!parseFloat(numberString) && !isNaN(numberString)) {
               let textContent = node.textContent;
               let newValue = roundNumber(numberString, differenceLimit);
 
               if (parseFloat(numberString) !== parseFloat(newValue)) {
-                updateSitePriceDom('amazon.com', node, numberFormating.format(newValue));
+                updateSitePriceDom('amazon', node, numberFormating.format(newValue));
 
+                node = node.querySelector("#priceblock_ourprice") || node;
                 setTooltipOnElement(node, textContent.trim());
               }
             }
@@ -56,7 +29,9 @@ const config = {
       }, { eagarCheck: false });
     },
     updatePriceDom: (node, priceValue) => {
-      let textMatch = node.textContent.replace(/[^\.\d\s,]/g, "").trim();
+      let amazonConfig = getAmazonConfig(window.location.hostname.replace("www.amazon.", ""));
+
+      let textMatch = (node.textContent.match(amazonConfig.regex || /\d+(?:\d*[\.,]?\d*)*/g)||[])[0];
       if (node.innerHTML.includes(textMatch)) {
         node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
       } else {
@@ -64,8 +39,8 @@ const config = {
         priceTextNode = !priceTextNode ? (node.querySelector('ppnn') || {}).parentElement : priceTextNode;
         let priceFractionTextNode = node.querySelector('.a-price-fraction');
         if (priceTextNode) {
-          if (priceTextNode.textContent.includes("$")) {
-            priceValue = "$" + priceValue;
+          if (priceTextNode.textContent.includes(amazonConfig.currency)) {
+            priceValue = amazonConfig.currency + priceValue;
           }
           priceTextNode.textContent = priceValue;
           priceFractionTextNode ? priceFractionTextNode.textContent = "00" : '';
@@ -139,8 +114,10 @@ function updateSitePriceDom(siteName, node, priceValue, options) {
   if (fn) {
     fn(node, priceValue)
   } else {
-    let regex = options.domUpdateRegex || /[^,\.\d\s]/g
-    let textMatch = node.textContent.replace(regex, "").trim();
+    // let regex = options.domUpdateRegex || /[^,\.\d\s]/g
+    // let textMatch = node.textContent.replace(regex, "").trim();
+
+    let textMatch = (node.textContent.match(/\d+(?:\d*[\.,]?\d*)*/g)||[])[0];
     if (node.innerHTML.includes(textMatch)) {
       node.innerHTML = node.innerHTML.replace(textMatch, priceValue);
     }
@@ -154,6 +131,7 @@ function defaultWalkAndReplace(rootElement, differenceLimit, priceSymbol, number
     if (priceSymbol.test(node.textContent)) {
       let regex = options.regex || /[^\.\d\s]/g
       let numberString = node.textContent.trim().replace(regex, "");
+      numberString = (numberString.match(/\d+\.?\d*/g)||[])[0];
 
       if(numberString && !!parseFloat(numberString) && !isNaN(numberString)) {
           let textContent = node.textContent;
