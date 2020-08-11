@@ -24,7 +24,7 @@ async function main() {
     let configObj = getConfigObj();
 
     configObj.findNumberDoms(document, differenceLimit);
-    
+
     registerMutationObserver(mutationObserver);
   }
 }

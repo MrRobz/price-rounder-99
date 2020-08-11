@@ -10,7 +10,10 @@ const config = {
       let numberFormating = amazonConfig.locale ? new Intl.NumberFormat(amazonConfig.locale) : ({ format: (no) => no });
 
       walkDOM(rootElement, (node) => {
-        if (node.textContent.includes(amazonConfig.currency)) {
+        if (
+            node.textContent.includes(amazonConfig.currency) || 
+            (node||{}).querySelector("[class*='currency']")
+          ) {
           let numberString = node.textContent.trim().replace(/[^\.\d\s]/g, "");
           numberString = (numberString.match(amazonConfig.regex || /\d+\.?\d*/g)||[])[0];
 
@@ -21,8 +24,13 @@ const config = {
               if (parseFloat(numberString) !== parseFloat(newValue)) {
                 updateSitePriceDom('amazon', node, numberFormating.format(newValue));
 
-                node = node.querySelector("#priceblock_ourprice") || node;
-                setTooltipOnElement(node, textContent.trim());
+                let isExactElement = false;
+                if (node.querySelector("#priceblock_ourprice")) {
+                  isExactElement = true;
+                  node = node.querySelector("#priceblock_ourprice");
+                }
+                
+                setTooltipOnElement(node, textContent.trim(), isExactElement, newValue.toString());
               }
             }
         }
